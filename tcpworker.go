@@ -26,13 +26,14 @@ const (
 
 // NewWorker creates a new TCP worker with a provided response channel
 func NewWorker(name, serverAddr string, responseChan chan map[string]interface{}) (*Worker, error) {
+	fmt.Println("TCP Worker V1.1.1")
 	conn, err := net.Dial("tcp", serverAddr)
 	if err != nil {
 		return nil, fmt.Errorf("error connecting to server: %s", err)
 	}
 
 	// Send the worker name to the server
-	workerNameMessage := map[string]interface{}{"name": name, "Type": TypeWorker}
+	workerNameMessage := map[string]interface{}{"ServiceName": name, "Type": TypeWorker}
 	initialMessage, _ := json.Marshal(workerNameMessage)
 	_, err =conn.Write(initialMessage)
 	if err != nil {
@@ -68,7 +69,7 @@ func (c *Worker) reconnect() error {
 	}
 
 	// Send the worker name to the server
-	workerNameMessage := map[string]interface{}{"name": c.Name, "Type": c.ConnectionType}
+	workerNameMessage := map[string]interface{}{"ServiceName": c.Name, "Type": c.ConnectionType}
 	initialMessage, _ := json.Marshal(workerNameMessage)
 	_,err = conn.Write(initialMessage)
 	if err != nil {
@@ -83,14 +84,14 @@ func (c *Worker) reconnect() error {
 
 // SendMessage sends a JSON message to the server
 func (c *Worker) SendResponse(response map[string]interface{}) error {
-	fmt.Printf("Starting send of:%v\n",response)
+	//fmt.Printf("Starting send of:%v\n",response)
 	// Encode the message as JSON
 	jsonResponse, err := json.Marshal(response)
 	if err != nil {
 		return fmt.Errorf("error encoding JSON: %s", err)
 	}
 
-	fmt.Println("Write to socket")
+	//fmt.Println("Write to socket")
 	_, err =c.Connection.Write(jsonResponse)
 	if err != nil {
 		return fmt.Errorf("error sending: %s", err)
@@ -107,9 +108,9 @@ func (c *Worker) handleRequests() error {
 		for {
 			if connectionEstablished {
 				decoder := json.NewDecoder(c.Connection)
-				fmt.Println("Received message on TCP/IP")
+				//fmt.Println("Received message on TCP/IP")
 				var requestMessage map[string]interface{}
-				fmt.Println("Before decoder")
+				//fmt.Println("Before decoder")
 				if err := decoder.Decode(&requestMessage); err != nil {
 					fmt.Printf("TCP/IP Decoder error:%s\n",err.Error())
 					c.Connection.Close()
@@ -128,6 +129,7 @@ func (c *Worker) handleRequests() error {
 					fmt.Println("Wake up!")
 				} else {
 					connectionEstablished = true
+					fmt.Println("Reconnected")
 				}
 			}
 		}	
