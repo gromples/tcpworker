@@ -117,7 +117,7 @@ func (c *Worker) handleRequests() error {
 					connectionEstablished = false
 				} else {
 					c.RequestChan <- requestMessage
-					fmt.Println("Send response on general response channel")
+					//fmt.Println("Send response on general response channel")
 				}
 			} else {
 				// Reconnect here using the receiver 'c'
